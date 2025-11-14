@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Http\RedirectResponse;
-
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class UserController extends Controller
 {
@@ -16,41 +14,40 @@ class UserController extends Controller
     {
         $this->userService = $userService;
     }
-    public function login(): Response
+
+    public function login(): SymfonyResponse
     {
-    return response()
-    ->view("user.login", [
-        "title" => "Login"
-    ]);
+        return response()->view('user.login', [
+            'title' => 'Login',
+        ]);
     }
 
-    public function doLogin(Request $request): Response|RedirectResponse
+    public function doLogin(Request $request): SymfonyResponse
     {
         $user = $request->input('user');
         $password = $request->input('password');
 
-        //Valdiate input
-        if(empty($user) || empty($password)){
-            return response()->view("user.login",[
-                "title" => "Login",
-                "error" => "User or password is required"
+        if (empty($user) || empty($password)) {
+            return response()->view('user.login', [
+                'title' => 'Login',
+                'error' => 'User or password is required',
             ]);
         }
-        if($this->userService->login($user, $password)){
-            $request->session()->put("user", $user);
-            return redirect("/");
+
+        if ($this->userService->login($user, $password)) {
+            $request->session()->put('user', $user);
+            return redirect('/');
         }
 
-        return response()->view("user.login",[
-            "title" => "Login",
-            "error" => "User or password is wrong"
+        return response()->view('user.login', [
+            'title' => 'Login',
+            'error' => 'User or password is wrong',
         ]);
     }
 
-
-     public function doLogout()
+    public function doLogout(Request $request): SymfonyResponse
     {
-
+        $request->session()->forget('user');
+        return redirect('/');
     }
-
 }
